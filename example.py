@@ -10,18 +10,30 @@ logger.setLevel('DEBUG')
 """
 ToDO: Notes
 
-Browser
+Device:
+    Robust connect (while lop with waiting)
+    Robust disconnect (routinely check for devices match device name in background) - Raise Error on disconnect
 
-Different 'modes' in mAppins
+    LED feedback for pioneer. Properly implement 
 
-Robust conect/dosconnect (routinely check for devices match device name in backgrund
+Mappings:
+    Different 'modes' in mappins
+    Cleverer MApping config structure
+        allow None for chanel etc as wildcard and more complicated multiples.
+            NB: Dict can have list tuple as key, perhaps that will help
+    Allow multiple siderKnob pairs (eg for when SHIFT on or off)
 
-MAppings:
- Cleverer allow None for chanel etc as wildcard and more complicated multiples.
- NB: Dict can have list tuple as keyy, perhaps that will help
-Allow multiple siderKnob pairs (eg for when SHIFT on or off)
+-------------
+Further steps:
+-------------
+Full config DDJ-SB left and right
 
-Messaging output
+Messaging output: 
+    Keyboard, Mouse
+    Gamepad
+    MQTT Bridge (output [publish] and as 'Device' [subscribe] (Tipp: expliot wildcard) etc.
+
+Mode creation function/example
 
 """
 

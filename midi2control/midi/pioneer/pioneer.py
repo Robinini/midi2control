@@ -34,6 +34,7 @@ class JogDial(MidiMap):
         self.current_state = -calculated_position if self.invert else calculated_position
         self.output(device, msg)
 
+
 class Browser(MidiMap):
 
     typ = 'control_change'

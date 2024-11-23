@@ -39,24 +39,42 @@ class Device:
         self.outport = open_output(self.name)
 
         self.midi_maps = dict()  # Accessible using keys
+        self.mode = None
 
         if midi_maps:
-            for map in midi_maps:
-                self.add_map(map)
+            for mode, maps in midi_maps.items():
+                for map in maps:
+                    self.add_map(map, mode)
 
     def monitor_inputs(self):
         for msg in self.inport:
             logging.debug(msg)
-            for map_name, m in self.midi_maps.items():
+            for map_name, m in self.midi_maps.get(self.mode).items():
                 if msg.type == m.type:
                     if msg.channel in flatten(m.channel):
                         if ((msg.type == 'control_change' and msg.control in flatten(m.control))
                                 or (msg.type == 'note_on' and msg.note in flatten(m.note))):
                             m.message(self, msg)
 
-    def add_map(self, map):
-        self.midi_maps[map.name] = map
+    def add_map(self, map, mode=None):
+        if mode not in self.midi_maps:
+            self.midi_maps[mode] = dict()
+        self.midi_maps[mode][map.name] = map
+
+    def change_mode(self, mode=None, index=None):
+        """
+
+        :param mode: Mode (dict key) to change to
+        :param index: Mode as index integer when mode keys are listed
+        :return:
+        """
+        print('Changing to mode', mode, index)
+        # ToDo: think thrg and implement.
+        #  Attach to browser or try changing using this method and a key.
+        #  Catch errors Provied used (os Notification feedback based on Win/Linus/?)
+        #  Each mode has anmation callback (future)?
+
 
     def animate(self):
-        pass  # trn on light x, turn off light y, sleep etc.. Example of having key accessible midi_mappings
+        raise NotImplementedError
 
