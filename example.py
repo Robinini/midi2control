@@ -10,11 +10,18 @@ logger.setLevel('DEBUG')
 """
 ToDO: Notes
 
-Allow None for chanel etc as wildcard
+Browser
+
+Different 'modes' in mAppins
+
+Robust conect/dosconnect (routinely check for devices match device name in backgrund
+
+MAppings:
+ Cleverer allow None for chanel etc as wildcard and more complicated multiples.
+ NB: Dict can have list tuple as keyy, perhaps that will help
 Allow multiple siderKnob pairs (eg for when SHIFT on or off)
 
 Messaging output
-
 
 """
 

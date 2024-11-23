@@ -1,6 +1,4 @@
 import logging
-import mido
-import logging
 
 
 class MidiMap:
@@ -28,9 +26,13 @@ class MidiMap:
 
         logging.debug(f'Creating mapping {self.name} {f"({self.description})" if self.description else str()}')
 
-    def reset(self):
-        logging.debug(f'Resetting {self.name}')
-        self.current_state = None
+    def __str__(self):
+        return f"{self.__class__.__name__}, {self.name}, {self.current_state}"
+
+    def reset(self, state=None):
+        logging.debug(f'Resetting {self}')
+        self.current_state = state
+        logging.debug(f'Reset {self}')
 
     def message(self, device, msg):
         """
@@ -39,9 +41,9 @@ class MidiMap:
         :param controller: Device controller triggering this message
         :return:
         """
-        pass
+        raise NotImplementedError
 
     def output(self, device, msg):
-        logging.info(f'{self.name}, value: {self.current_state} from {device.name} triggred by message {msg}')
+        logging.info(f'{self} from {device.name} triggered by message {msg}')
         for output in self.outputs:
             output(self, device, msg)
