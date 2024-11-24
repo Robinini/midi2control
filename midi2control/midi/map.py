@@ -4,12 +4,12 @@ import logging
 class MidiMap:
     def __init__(self, name, typ, channel, control=None, note=None, outputs=None, description=None):
         """
-        Mapping. NB This could be tched to multiple devices attached in parallel
-        :param name:
-        :param type:
-        :param channel:
-        :param control:
-        :param outputs: List of output classes which should have a method trigger() accepting this object and triggering device object
+        Mapping. NB This could be attached to multiple devices attached in parallel
+        :param name: Name used as midi device name to connect
+        :param type: MIDI message type or None for all types
+        :param channel: MIDI channel, iterable of channels or None for all channels
+        :param control: MIDI control, iterable of controls or None for all controls
+        :param outputs: List of map output functions which should be executed on mapping input
         :param description:
         """
         self.name = name  # unique for device

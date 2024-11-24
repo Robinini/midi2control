@@ -1,4 +1,6 @@
 import logging
+import time
+import threading
 import mido
 
 
@@ -26,6 +28,10 @@ def open_output(device_name):
 
 class Device:
     def __init__(self, name, midi_maps=None):
+        """
+        :param name: Name used as midi device name to connect
+        :param midi_maps:
+        """
 
         self.name = name
         if self.name not in read_midi_devices()[0]:
@@ -50,10 +56,10 @@ class Device:
         for msg in self.inport:
             logging.debug(msg)
             for map_name, m in self.midi_maps.get(self.mode).items():
-                if msg.type == m.type:
-                    if msg.channel in flatten(m.channel):
-                        if ((msg.type == 'control_change' and msg.control in flatten(m.control))
-                                or (msg.type == 'note_on' and msg.note in flatten(m.note))):
+                if m.type is None or m.type == msg.type:
+                    if m.channel is None or msg.channel in flatten(m.channel):
+                        if ((msg.type == 'control_change' and (m.control is None or msg.control in flatten(m.control)))
+                                or (msg.type == 'note_on' and (m.note is None or msg.note in flatten(m.note)))):
                             m.message(self, msg)
 
     def add_map(self, map, mode=None):
@@ -69,7 +75,7 @@ class Device:
         :return:
         """
         print('Changing to mode', mode, index)
-        # ToDo: think thrg and implement.
+        # ToDo: think through and implement.
         #  Attach to browser or try changing using this method and a key.
         #  Catch errors Provied used (os Notification feedback based on Win/Linus/?)
         #  Each mode has anmation callback (future)?
