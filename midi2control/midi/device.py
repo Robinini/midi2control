@@ -1,7 +1,20 @@
 import logging
-import time
-import threading
+import subprocess
 import mido
+import os
+import math
+
+if os.name == 'nt':
+    from win10toast import ToastNotifier
+
+
+def notify_user(subject, message):
+    if os.name == 'nt':
+        ToastNotifier().show_toast(subject, message, duration=5, threaded=True)
+    elif os.name == 'darwin':
+        os.system("""osascript -e 'display notification "{}" with title "{}"'""".format(subject, message))
+    elif os.name == 'posix':
+        subprocess.run(['notify-send', subject, message])
 
 
 def flatten(something):
@@ -52,6 +65,12 @@ class Device:
                 for map in maps:
                     self.add_map(map, mode)
 
+    def radio(self, map):
+        if map.radio is not None:
+            for m in self.midi_maps.get(self.mode).values():
+                if m != map and m.radio == map.radio:
+                    m.off(map, self)
+
     def monitor_inputs(self):
         for msg in self.inport:
             logging.debug(msg)
@@ -67,20 +86,47 @@ class Device:
             self.midi_maps[mode] = dict()
         self.midi_maps[mode][map.name] = map
 
-    def change_mode(self, mode=None, index=None):
+    def get_map(self, map_name, mode=None):
+        return self.midi_maps[mode][map_name]
+
+    def get_mode_index(self, integer):
+        """Calculates suitable rolling index from mode names,
+        taking into account -ve numbers and indexes larger than the list"""
+        # ToDO
+        max_index = len(self.midi_maps.keys()) - 1
+        if integer <= max_index:
+            return integer
+
+    def browse_mode(self, map, device=None, msg=None):
+        """"""
+        mode_name = list(self.midi_maps.keys())[self.get_mode_index(map.current_state)]
+
+        subject, message = f"Use MIDI Controller {self.name}", f" mode '{mode_name}'?"
+        logging.info(subject, message)
+        notify_user(subject, message)
+
+    def change_mode(self, mode_name=None, mode_index=0):
         """
 
         :param mode: Mode (dict key) to change to
         :param index: Mode as index integer when mode keys are listed
         :return:
         """
-        print('Changing to mode', mode, index)
-        # ToDo: think through and implement.
-        #  Attach to browser or try changing using this method and a key.
-        #  Catch errors Provied used (os Notification feedback based on Win/Linus/?)
-        #  Each mode has anmation callback (future)?
+
+        if mode_name is not None:
+            self.mode = mode_name
+        elif mode_index is not None:
+            self.mode = list(self.midi_maps.keys())[self.get_mode_index(mode_index)]
+
+        # Provide user feedback
+        self.animate()
+
+        subject, message = f"MIDI Controller {self.name}", f"changing to mode {self.mode}"
+        logging.info(subject, message)
+        notify_user(subject, message)
+
 
 
     def animate(self):
-        raise NotImplementedError
+        pass
 

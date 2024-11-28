@@ -21,14 +21,13 @@ MIXER = [Slide('CROSSFADER', channel=6, control=(31, 63), center=True),
 DECK1 = [Press('PLAY/PAUSE:Deck1', channel=0, note=[11, 71]),
          Press('CUE:Deck1', channel=0, note=[12, 72]),
          Press('SYNC:Deck1', channel=0, note=[88, 92]),
-         JogDial('JOG DIAL:Platter:Deck1', channel=0, control=[34, 35, 31]),
-         Press('JOG DIAL:Platter:Deck1', channel=0, note=[54, 53, 103]),
+         JogDial('JOG DIAL:Platter:rotate:Deck1', channel=0, control=[34, 35, 31]),
+         Press('JOG DIAL:Platter:touch:Deck1', channel=0, note=[54, 53, 103]),
          JogDial('JOG DIAL:Wheel side:Deck1', channel=0, control=[33, 38]),
          Slide('TEMPO:Deck1', channel=0, control=[(0, 32), (5, 37)], center=True),
          Press('VINYL:Deck1', channel=0, note=[23, 78], toggle=True),
          Press('KEYLOCK:Deck1', channel=0, note=[26, 96], toggle=True),
          Press('SHIFT:Deck1', channel=0, note=63, toggle=True),
-         Press('Sampler Deck1', toggle=True, channel=0, note=[34, 111]),
          # Mixer controls for deck
          Slide('CH FADER:Deck1', channel=0, control=(19, 51)),
          Rotate('EQ HIGH:Deck1', channel=0, control=(7, 39)),
@@ -36,16 +35,18 @@ DECK1 = [Press('PLAY/PAUSE:Deck1', channel=0, note=[11, 71]),
          Rotate('EQ LOW:Deck1', channel=0, control=(15, 47)),
          Press('CUE:Headphone:Deck1', channel=0, note=[84, 104], toggle=True),
          #Performance Pads
-         Press('HOT CUE mode:Deck1', channel=0, note=[27, 105]),
-         Press('AUTO LOOP mode:Deck1', channel=0, note=[30, 107]),
-         Press('MANUAL LOOP mode:Deck1', channel=0, note=[32, 109]),
-         Press('SAMPLER mode:Deck1', channel=0, note=[34, 111]),
+         Press('HOT CUE mode:Deck1', channel=0, note=[27, 105], radio='Pads1'),
+         Press('AUTO LOOP mode:Deck1', channel=0, note=[30, 107], radio='Pads1'),
+         Press('MANUAL LOOP mode:Deck1', channel=0, note=[32, 109], radio='Pads1'),
+         Press('SAMPLER mode:Deck1', channel=0, note=[34, 111], radio='Pads1', initial_state=True),
          ]
 
 DECK2 = copy.deepcopy(DECK1)
 for r in DECK2:
     r.name = r.name.replace('Deck1', 'Deck2')
     r.channel = 1
+    if r.radio:
+        r.radio = r.radio.replace('1', '2')
 
 FX1 = [Press('FX1-1 ON', channel=4, note=[71, 99], toggle=True),
        Press('FX1-2 ON', channel=4, note=[72, 100], toggle=True),
@@ -61,10 +62,10 @@ for r in FX2:
     r.name = r.name.replace('FX1', 'FX2')
     r.channel = 5
 
-PADS1 = [Press('PERFORMANCE PAD 1:Deck1', channel=7, note=[0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120], toggle=True),
-         Press('PERFORMANCE PAD 2:Deck1', channel=7, note=[1, 9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121], toggle=True),
-         Press('PERFORMANCE PAD 3:Deck1', channel=7, note=[2, 10, 18, 26, 34, 42, 50, 58, 66, 74, 82, 90, 98, 106, 114, 122], toggle=True),
-         Press('PERFORMANCE PAD 4:Deck1', channel=7, note=[3, 11, 19, 27, 35, 43, 51, 59, 67, 75, 83, 91, 99, 107, 115, 123], toggle=True),
+PADS1 = [Press('PERFORMANCE PAD 1:Deck1', channel=7, note=[0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120]),
+         Press('PERFORMANCE PAD 2:Deck1', channel=7, note=[1, 9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121]),
+         Press('PERFORMANCE PAD 3:Deck1', channel=7, note=[2, 10, 18, 26, 34, 42, 50, 58, 66, 74, 82, 90, 98, 106, 114, 122]),
+         Press('PERFORMANCE PAD 4:Deck1', channel=7, note=[3, 11, 19, 27, 35, 43, 51, 59, 67, 75, 83, 91, 99, 107, 115, 123]),
          ]
 
 PADS2 = copy.deepcopy(PADS1)
