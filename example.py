@@ -15,7 +15,7 @@ Device:
     Robust disconnect (routinely check for devices match device name in background) - Raise Error on disconnect
 
 Radio Group to mimic hardwired group deselect
-
+Mode creation function/example
 -------------
 Further steps:
 -------------
@@ -25,7 +25,7 @@ Messaging output:
     Gamepad
     MQTT Bridge (output [publish] and as 'Device' [subscribe] (Tip: exploit None wildcard) etc.
 
-Mode creation function/example
+
 
 """
 

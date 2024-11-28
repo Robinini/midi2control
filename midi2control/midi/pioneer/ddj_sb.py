@@ -34,7 +34,7 @@ DECK1 = [Press('PLAY/PAUSE:Deck1', channel=0, note=[11, 71]),
          Rotate('EQ HIGH:Deck1', channel=0, control=(7, 39)),
          Rotate('EQ MID:Deck1', channel=0, control=(11, 43)),
          Rotate('EQ LOW:Deck1', channel=0, control=(15, 47)),
-         Press('CUE:Headphone:Deck1', channel=0, note=[84, 104]),
+         Press('CUE:Headphone:Deck1', channel=0, note=[84, 104], toggle=True),
          #Performance Pads
          Press('HOT CUE mode:Deck1', channel=0, note=[27, 105]),
          Press('AUTO LOOP mode:Deck1', channel=0, note=[30, 107]),
