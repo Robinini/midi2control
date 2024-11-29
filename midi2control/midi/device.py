@@ -4,17 +4,7 @@ import mido
 import os
 import math
 
-if os.name == 'nt':
-    from win10toast import ToastNotifier
-
-
-def notify_user(subject, message):
-    if os.name == 'nt':
-        ToastNotifier().show_toast(subject, message, duration=5, threaded=True)
-    elif os.name == 'darwin':
-        os.system("""osascript -e 'display notification "{}" with title "{}"'""".format(subject, message))
-    elif os.name == 'posix':
-        subprocess.run(['notify-send', subject, message])
+from midi2control import notify_user
 
 
 def flatten(something):
@@ -43,7 +33,7 @@ class Device:
     def __init__(self, name, midi_maps=None):
         """
         :param name: Name used as midi device name to connect
-        :param midi_maps:
+        :param midi_maps: List of mappings in dictionary keyed by mode name
         """
 
         self.name = name
@@ -61,9 +51,7 @@ class Device:
         self.mode = None
 
         if midi_maps:
-            for mode, maps in midi_maps.items():
-                for map in maps:
-                    self.add_map(map, mode)
+            self.add_maps(midi_maps)
 
     def radio(self, map):
         if map.radio is not None:
@@ -81,6 +69,12 @@ class Device:
                                 or (msg.type == 'note_on' and (m.note is None or msg.note in flatten(m.note)))):
                             m.message(self, msg)
 
+    def add_maps(self, midi_maps):
+        for mode, maps in midi_maps.items():
+            for map in maps:
+                self.add_map(map, mode)
+        
+    
     def add_map(self, map, mode=None):
         if mode not in self.midi_maps:
             self.midi_maps[mode] = dict()
@@ -89,23 +83,28 @@ class Device:
     def get_map(self, map_name, mode=None):
         return self.midi_maps[mode][map_name]
 
-    def get_mode_index(self, integer):
+    def get_mode_key(self, integer):
         """Calculates suitable rolling index from mode names,
         taking into account -ve numbers and indexes larger than the list"""
-        # ToDO
-        max_index = len(self.midi_maps.keys()) - 1
-        if integer <= max_index:
-            return integer
+
+        modes = list(self.midi_maps.keys())
+        mode_name = modes[integer % len(modes)]
+
+        return mode_name
 
     def browse_mode(self, map, device=None, msg=None):
         """"""
-        mode_name = list(self.midi_maps.keys())[self.get_mode_index(map.current_state)]
+        mode_key = self.get_mode_key(map.current_state)
 
-        subject, message = f"Use MIDI Controller {self.name}", f" mode '{mode_name}'?"
-        logging.info(subject, message)
+        if mode_key != self.mode:
+            subject, message = f"MIDI Controller {self.name}", f" mode '{(mode_key or 'DEFAULT')}' ready for selection"
+        else:
+            subject, message = f"MIDI Controller {self.name}", f"current mode {(self.mode or 'DEFAULT')}"
+
+        logging.info(subject + ' ' + message)
         notify_user(subject, message)
 
-    def change_mode(self, mode_name=None, mode_index=0):
+    def change_mode(self, mode_key=None, mode_index=None):
         """
 
         :param mode: Mode (dict key) to change to
@@ -113,19 +112,23 @@ class Device:
         :return:
         """
 
-        if mode_name is not None:
-            self.mode = mode_name
-        elif mode_index is not None:
-            self.mode = list(self.midi_maps.keys())[self.get_mode_index(mode_index)]
+        if isinstance(mode_index, int):
+            mode_key = self.get_mode_key(mode_index)
 
-        # Provide user feedback
-        self.animate()
+        if mode_key in self.midi_maps:
+            if mode_key != self.mode:
+                self.mode = mode_key
+                # Provide user feedback
+                self.animate()
+                subject, message = f"MIDI Controller {self.name}", f"changed to mode {(self.mode or 'DEFAULT')}"
+            else:
+                subject, message = f"MIDI Controller {self.name}", f"current mode {(self.mode or 'DEFAULT')}"
 
-        subject, message = f"MIDI Controller {self.name}", f"changing to mode {self.mode}"
-        logging.info(subject, message)
+        else:
+            raise ValueError(f'Invalid mode {mode_key} selected!!')
+
+        logging.info(subject + ' ' + message)
         notify_user(subject, message)
-
-
 
     def animate(self):
         pass

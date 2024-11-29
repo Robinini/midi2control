@@ -11,10 +11,9 @@ logger.setLevel('INFO')
 ToDO: Future
 
 Device:
-    Robust connect (while lop with waiting)
+    Robust connect (while loop with waiting)
     Robust disconnect (routinely check for devices match device name in background) - Raise Error on disconnect
 
-Radio Group to mimic hardwired group deselect
 Mode creation function/example
 -------------
 Further steps:
@@ -23,6 +22,7 @@ Further steps:
 Messaging output: 
     Keyboard, Mouse
     Gamepad
+    Sound
     MQTT Bridge (output [publish] and as 'Device' [subscribe] (Tip: exploit None wildcard) etc.
 
 

@@ -1,12 +1,14 @@
 import time
-import copy
+from threading import Thread
+from midi2control.midi.map import map_copy
 from midi2control.midi.device import Device
 from midi2control.midi.pioneer.pioneer import *
 
 # Note on mappings. Each mapping below are set up for both shift on and off position - i.e: ignore the shift state
-BROWSER = [Browser('BROWSE:ROTATE', channel=6, control=[64, 100]),
-           Press('BROWSE:PRESS', channel=6, note=[65, 66]),
-           Press('LOAD:Deck1', channel=6, note=[70, 88]),
+MODE_SELECTOR = [Browser('BROWSE:ROTATE', channel=6, control=[64, 100]),
+           Press('BROWSE:PRESS', channel=6, note=[65, 66])]
+
+BROWSER = [Press('LOAD:Deck1', channel=6, note=[70, 88]),
            Press('LOAD:Deck2', channel=6, note=[71, 89]),
            Press('BACK', channel=6, note=[101, 102])
            ]
@@ -41,7 +43,7 @@ DECK1 = [Press('PLAY/PAUSE:Deck1', channel=0, note=[11, 71]),
          Press('SAMPLER mode:Deck1', channel=0, note=[34, 111], radio='Pads1', initial_state=True),
          ]
 
-DECK2 = copy.deepcopy(DECK1)
+DECK2 = map_copy(DECK1)
 for r in DECK2:
     r.name = r.name.replace('Deck1', 'Deck2')
     r.channel = 1
@@ -57,7 +59,7 @@ FX1 = [Press('FX1-1 ON', channel=4, note=[71, 99], toggle=True),
        Rotate('FX1 BEATS', channel=4, control=(0, 32)),
        ]
 
-FX2 = copy.deepcopy(FX1)
+FX2 = map_copy(FX1)
 for r in FX2:
     r.name = r.name.replace('FX1', 'FX2')
     r.channel = 5
@@ -68,7 +70,7 @@ PADS1 = [Press('PERFORMANCE PAD 1:Deck1', channel=7, note=[0, 8, 16, 24, 32, 40,
          Press('PERFORMANCE PAD 4:Deck1', channel=7, note=[3, 11, 19, 27, 35, 43, 51, 59, 67, 75, 83, 91, 99, 107, 115, 123]),
          ]
 
-PADS2 = copy.deepcopy(PADS1)
+PADS2 = map_copy(PADS1)
 for r in PADS2:
     r.name = r.name.replace('Deck1', 'Deck2')
     r.channel = 8
@@ -77,22 +79,36 @@ for r in PADS2:
 
 class DDJ_SB(Device):
     def __init__(self, name='PIONEER DDJ-SB:PIONEER'):
-        Device.__init__(self, name=name, midi_maps={None: BROWSER + MIXER + DECK1 + DECK2 + FX1 + FX2 + PADS1 + PADS2})
-        # Send DJ.App connected singal - ths will prompt current positions to be broadcast
+        # NB: Make copy of maps declared above to preserve the originals
+        # (otherwise they will also have outputs assigned)
+        # We will however use the original MODE_SELECTOR and allow modification and reuse of modes
+        Device.__init__(self, name=name, midi_maps={None: MODE_SELECTOR + map_copy(BROWSER) + map_copy(MIXER) +
+                                                          map_copy(DECK1) + map_copy(DECK2) + map_copy(FX1)
+                                                          + map_copy(FX2) + map_copy(PADS1) + map_copy(PADS2)})
+        # Send DJ.App connected signal - ths will prompt current positions to be broadcast
         self.outport.send(mido.Message('note_on', channel=11, note=9))
         self.animate()
 
     def animate(self):
         """
-        Light up keys configured in current mode for 5 seconds
+        Blink keys configured in current mode
         :return:
         """
-        for i in range(5):
-            for m in self.midi_maps.get(self.mode).values():
-                if m.__class__ == Press:
-                    m.led_on(self)
-            time.sleep(0.5)
-            for m in self.midi_maps.get(self.mode).values():
-                if m.__class__ == Press:
-                    m.led_off(self)
 
+        def buttons():
+            return [m for m in self.midi_maps.get(self.mode).values() if m.__class__ == Press]
+
+        def blink():
+            for i in range(5):
+                for m in buttons():
+                    m.led_on(self)
+                time.sleep(0.5)
+                for m in buttons():
+                    m.led_off(self)
+            # Restore according to current status
+            for m in buttons():
+                if m.current_state:
+                    m.led_on(self)
+
+        # Run in thread to allow continued use of device
+        Thread(target=blink).start()

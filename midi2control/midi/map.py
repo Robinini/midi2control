@@ -1,4 +1,9 @@
 import logging
+import copy
+
+
+def map_copy(maps):
+    return [copy.deepcopy(m) for m in maps] if isinstance(map, list) else copy.deepcopy(maps)
 
 
 class MidiMap:
