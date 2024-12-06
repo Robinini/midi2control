@@ -7,12 +7,12 @@ def map_copy(maps):
 
 
 class MidiMap:
-    def __init__(self, name, typ, channel, control=None, note=None, outputs=None, description=None,
+    def __init__(self, name, typ=None, channel=None, control=None, note=None, outputs=None, description=None,
                  initial_state=None, radio=None):
         """
         Mapping. NB This could be attached to multiple devices attached in parallel
         :param name: Name used as midi device name to connect
-        :param type: MIDI message type or None for all types
+        :param typ: MIDI message type or None for all types
         :param channel: MIDI channel, iterable of channels or None for all channels
         :param control: MIDI control, iterable of controls or None for all controls
         :param outputs: List of map output functions which should be executed on mapping input
@@ -64,7 +64,7 @@ class MidiMap:
         :param controller: Device controller triggering this message
         :return:
         """
-        raise NotImplementedError
+        self.output(device, msg)
 
     def add_output(self, func, initialise=True):
         self.outputs.append(func)

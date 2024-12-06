@@ -1,8 +1,6 @@
 import logging
-import subprocess
 import mido
-import os
-import math
+
 
 from midi2control import notify_user
 from midi2control.midi.map import MidiMap
@@ -38,6 +36,8 @@ class Device:
         """
 
         self.name = name
+
+
         if self.name not in read_midi_devices()[0]:
             for candidate in read_midi_devices()[0]:
                 if candidate.startswith(self.name):
