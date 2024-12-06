@@ -1,5 +1,4 @@
 from midi2control.midi.pioneer.ddj_sb import DDJ_SB
-from midi2control.control.mouse import Scroll
 
 
 import logging

@@ -5,6 +5,7 @@ import os
 import math
 
 from midi2control import notify_user
+from midi2control.midi.map import MidiMap
 
 
 def flatten(something):
@@ -112,9 +113,14 @@ class Device:
         :return:
         """
 
+        # Obtain current_state if the index source is a Map basd object
+        if MidiMap in mode_index.__class__.__mro__:
+            mode_index = int(mode_index.current_state)
+        # Use index to get mode_key
         if isinstance(mode_index, int):
             mode_key = self.get_mode_key(mode_index)
 
+        # Use provided or derived mode_key to change mode
         if mode_key in self.midi_maps:
             if mode_key != self.mode:
                 self.mode = mode_key

@@ -29,20 +29,26 @@ class MidiMap:
 
         self.radio = radio
 
-        self.initial_state = initial_state
-        self.current_state = initial_state
-
         self.outputs = outputs or list()
 
-        logging.debug(f'Creating mapping {self.name} {f"({self.description})" if self.description else str()}')
+        self.initial_state = initial_state
+        self.previous_state = initial_state
+        self.current_state = initial_state
+
+        logging.debug(f'Created mapping {self.name} {f"({self.description})" if self.description else str()}')
 
     def __str__(self):
         return f"{self.__class__.__name__}, {self.name}, {self.current_state}"
 
+    def set(self, state):
+        logging.debug(f'Setting {self} to {state}')
+        self.previous_state = self.current_state
+        self.current_state = state
+        logging.debug(f'Set {self} to {state}')
+
     def reset(self):
         logging.debug(f'Resetting {self}')
-        self.current_state = self.initial_state
-        self.output()
+        self.set(self.initial_state)
         logging.debug(f'Reset {self}')
 
     def on(self, map, device=None, msg=None):

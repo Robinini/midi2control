@@ -24,6 +24,7 @@ class JogDial(MidiMap):
         self.min = min_out
 
         self.reset()
+        self.output()
 
     def reset(self):
         MidiMap.reset(self)
@@ -37,7 +38,7 @@ class JogDial(MidiMap):
             calculated_position = self.max
         if self.min is not None and calculated_position < self.min:
             calculated_position = self.min
-        self.current_state = calculated_position
+        self.set(calculated_position)
         self.output(device, msg)
 
 
@@ -56,15 +57,16 @@ class Browser(MidiMap):
         self.invert = invert
 
         self.reset()
+        self.output()
 
     def reset(self):
         MidiMap.reset(self)
 
     def message(self, device, msg):
         if msg.value < 98:  # Clockwise
-            self.current_state += -msg.value if self.invert else msg.value
+            self.set(self.current_state + (-msg.value if self.invert else msg.value))
         else:
-            self.current_state += (128-msg.value) if self.invert else -(128-msg.value)
+            self.set(self.current_state + ((128-msg.value) if self.invert else -(128-msg.value)))
         self.output(device, msg)
 
 
@@ -95,6 +97,7 @@ class Slide(MidiMap):
         self.fine_value = None
 
         self.reset()
+        self.output()
 
     def reset(self):
         MidiMap.reset(self)
@@ -120,7 +123,7 @@ class Slide(MidiMap):
 
             # Update value and output if above step value (or no step)
             if not self.step or abs(calculated_position - self.current_state) > self.step or calculated_position in (0, 1):
-                self.current_state = calculated_position
+                self.set(calculated_position)
                 self.output(device, msg)
             else:
                 logging.debug(f'{self} output change below step value, outputs not executed')
@@ -146,6 +149,7 @@ class Press(MidiMap):
         self.toggle = toggle
 
         self.reset()
+        self.output()
 
     def reset(self):
         MidiMap.reset(self)
@@ -169,7 +173,7 @@ class Press(MidiMap):
     def on(self, map, device=None, msg=None):
         """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
         if self.current_state is not True:
-            self.current_state = True
+            self.set(True)
             self.led_on(device)
             if self.radio is not None:
                 device.radio(self)
@@ -178,7 +182,7 @@ class Press(MidiMap):
     def off(self, map, device=None, msg=None):
         """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
         if self.current_state is not False:
-            self.current_state = False
+            self.set(False)
             if map != self:
                 logging.debug(f'{self} turned off by {map}')
             self.led_off(device)
