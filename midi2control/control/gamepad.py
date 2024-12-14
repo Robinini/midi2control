@@ -102,7 +102,7 @@ def left_trigger(gamepad, invert=False):
         else:
             state = m.current_state if not invert else -m.current_state
         logging.debug(f'Moving left trigger to {state}')
-        gamepad.left_trigger(value=round(state*255))
+        gamepad.left_trigger_float(state)
         gamepad.update()
 
     return fun
@@ -118,7 +118,7 @@ def right_trigger(gamepad, invert=False):
         else:
             state = m.current_state if not invert else -m.current_state
         logging.debug(f'Moving right trigger to {state}')
-        gamepad.right_trigger(value=round(state*255))
+        gamepad.right_trigger_float(value_float=state)
         gamepad.update()
 
     return fun

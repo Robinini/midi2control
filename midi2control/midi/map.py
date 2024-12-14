@@ -72,6 +72,8 @@ class MidiMap:
         if initialise:
             func(self)
 
+        return self  # Allows method chaining
+
     def output(self, device=None, msg=None):
         logging.info(f'{self} from Device {device.name if device else "(no device)"} '
                      f'triggered by message {msg or "(no message)"}')
