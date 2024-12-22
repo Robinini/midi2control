@@ -1,6 +1,6 @@
 import time
 from threading import Thread
-from midi2control.midi.map import map_copy
+from midi2control.midi.mapping import map_copy
 from midi2control.midi.device import Device
 from midi2control.midi.pioneer.pioneer import *
 

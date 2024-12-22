@@ -3,7 +3,7 @@ import copy
 
 
 def map_copy(maps):
-    return [copy.deepcopy(m) for m in maps] if isinstance(map, list) else copy.deepcopy(maps)
+    return [copy.deepcopy(m) for m in maps] if isinstance(maps, list) else copy.deepcopy(maps)
 
 
 class MidiMap:
@@ -15,7 +15,7 @@ class MidiMap:
         :param typ: MIDI message type or None for all types
         :param channel: MIDI channel, iterable of channels or None for all channels
         :param control: MIDI control, iterable of controls or None for all controls
-        :param outputs: List of map output functions which should be executed on mapping input
+        :param outputs: List of mapping output functions which should be executed on mapping input
         :param description:
         :param radio: Name of group if considered a radio button (activation of member resets other members)
         """
@@ -51,17 +51,17 @@ class MidiMap:
         self.set(self.initial_state)
         logging.debug(f'Reset {self}')
 
-    def on(self, map, device=None, msg=None):
+    def on(self, mapping, device=None, msg=None):
         raise NotImplementedError
 
-    def off(self, map, device=None, msg=None):
+    def off(self, mapping, device=None, msg=None):
         raise NotImplementedError
 
     def message(self, device, msg):
         """
 
         :param msg: mido midi message
-        :param controller: Device controller triggering this message
+        :param device: Device controller triggering this message
         :return:
         """
         self.output(device, msg)
@@ -75,7 +75,7 @@ class MidiMap:
         return self  # Allows method chaining
 
     def output(self, device=None, msg=None):
-        logging.info(f'{self} from Device {device.name if device else "(no device)"} '
+        logging.info(f'{self} from Device {device if device else "(no device)"} '
                      f'triggered by message {msg or "(no message)"}')
         for output in self.outputs:
             output(self, device, msg)

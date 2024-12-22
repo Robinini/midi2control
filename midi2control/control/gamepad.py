@@ -28,7 +28,7 @@ class BUTTONS:
     Y = 0x8000
 
 
-def button(gamepad, button):
+def button_press(gamepad, button):
 
     def fun(*args, **kwargs):
         m = args[0]

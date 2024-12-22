@@ -17,24 +17,24 @@ class ElgatoLight(LegLight):
         self.color_step = color_step
         self.brightness_step = brightness_step
 
-    def switch(self, map, device=None, msg=None):
-        if map.current_state:
+    def switch(self, mapping, device=None, msg=None):
+        if mapping.current_state:
             self.on()
         else:
             self.off()
 
-    def set_color(self, map, device=None, msg=None):
+    def set_color(self, mapping, device=None, msg=None):
         # Convert range 0-1 to 2900-7000
-        new_color = 2900 + map.current_state * (7000-2900)
+        new_color = 2900 + mapping.current_state * (7000 - 2900)
         if not self.color_step or abs(new_color - self.isTemperature) > self.color_step or new_color in (7000, 2900):
             self.color(new_color)
         else:
             logging.debug(f'{self} color change {abs(new_color - self.isTemperature)} '
                           f'below step value {self.color_step}, not changed')
 
-    def set_brightness(self, map, device=None, msg=None):
+    def set_brightness(self, mapping, device=None, msg=None):
         # brightness 0-100
-        new_brightness = 100 * map.current_state
+        new_brightness = 100 * mapping.current_state
         if not self.brightness_step or abs(new_brightness - self.isBrightness) > self.brightness_step or new_brightness in (0, 100):
             self.brightness(new_brightness)
         else:

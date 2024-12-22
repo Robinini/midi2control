@@ -1,5 +1,5 @@
 import logging
-from midi2control.midi.map import MidiMap
+from midi2control.midi.mapping import MidiMap
 from midi2control.midi.device import flatten
 import mido
 
@@ -8,7 +8,7 @@ class JogDial(MidiMap):
 
     typ = 'control_change'
 
-    def __init__(self, name, channel, control, description=None, invert=False, max_out=None, min_out=None):
+    def __init__(self, name, channel, control, description=None, invert=False, max_state=None, min_state=None):
         """
 
         :param max: Maximum output limit
@@ -20,8 +20,8 @@ class JogDial(MidiMap):
                          description=description, initial_state=0)
 
         self.invert = invert
-        self.max = max_out
-        self.min = min_out
+        self.max_state = max_state
+        self.min_state = min_state
 
         self.reset()
         self.output()
@@ -34,10 +34,10 @@ class JogDial(MidiMap):
         if self.invert:
             scaled_value = -1 *  scaled_value
         calculated_position = self.current_state + scaled_value
-        if self.max is not None and calculated_position > self.max:
-            calculated_position = self.max
-        if self.min is not None and calculated_position < self.min:
-            calculated_position = self.min
+        if self.max_state is not None and calculated_position > self.max_state:
+            calculated_position = self.max_state
+        if self.min_state is not None and calculated_position < self.min_state:
+            calculated_position = self.min_state
         self.set(calculated_position)
         self.output(device, msg)
 
@@ -170,7 +170,7 @@ class Press(MidiMap):
             self.off(self, device, msg)
 
 
-    def on(self, map, device=None, msg=None):
+    def on(self, mapping, device=None, msg=None):
         """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
         if self.current_state is not True:
             self.set(True)
@@ -179,12 +179,12 @@ class Press(MidiMap):
                 device.radio(self)
             self.output(device, msg)
 
-    def off(self, map, device=None, msg=None):
+    def off(self, mapping, device=None, msg=None):
         """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
         if self.current_state is not False:
             self.set(False)
-            if map != self:
-                logging.debug(f'{self} turned off by {map}')
+            if mapping != self:
+                logging.debug(f'{self} turned off by {mapping}')
             self.led_off(device)
             self.output(device, msg)
 
