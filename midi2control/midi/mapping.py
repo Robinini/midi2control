@@ -44,7 +44,7 @@ class MidiMap:
         logging.debug(f'Setting {self} to {state}')
         self.previous_state = self.current_state
         self.current_state = state
-        logging.debug(f'Set {self} to {state}')
+        logging.debug(f'Set {self} from {self.previous_state} to {self.current_state}')
 
     def reset(self):
         logging.debug(f'Resetting {self}')

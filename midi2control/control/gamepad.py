@@ -1,15 +1,29 @@
 import logging
 import vgamepad as vg
 
+"""
+Gamepad control outputs which can be added as output to a device mapping.
+
+Uses gamepad implementations from the vgamepad library
+
+"""
+
+
 class Gamepad(vg.VX360Gamepad):
     def __init__(self):
+        """
+        Gamepad class to create gamepad instance using the XBOX-360 model.
+        """
         super().__init__()
         logging.debug('Virtual Gamepad created')
 
 
 class BUTTONS:
     """
-    Possible buttons.
+    Possible buttons as class variables. Can be used in button_press function, eg:
+
+        <device>.add_output(gamepad.button_press(Gamepad(), BUTTONS.LEFT_SHOULDER))
+
     """
     DPAD_UP = 0x0001
     DPAD_DOWN = 0x0002
@@ -29,6 +43,13 @@ class BUTTONS:
 
 
 def button_press(gamepad, button):
+    """
+    Creates callable function to execute a gamepad button press
+
+    :param gamepad: the gamepad to use for the press
+    :param button: The button to press
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -45,6 +66,12 @@ def button_press(gamepad, button):
 
 
 def left_joystick_x(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad left joystick x-axes position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -57,6 +84,12 @@ def left_joystick_x(gamepad, invert=False):
 
 
 def left_joystick_y(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad left joystick y-axes position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -69,6 +102,12 @@ def left_joystick_y(gamepad, invert=False):
 
 
 def right_joystick_x(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad rigth joystick x-axes position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -81,6 +120,12 @@ def right_joystick_x(gamepad, invert=False):
 
 
 def right_joystick_y(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad right joystick y-axes position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -93,6 +138,12 @@ def right_joystick_y(gamepad, invert=False):
 
 
 def left_trigger(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad left trigger position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]
@@ -109,6 +160,12 @@ def left_trigger(gamepad, invert=False):
 
 
 def right_trigger(gamepad, invert=False):
+    """
+    Creates callable function to execute a gamepad right trigger position change
+    :param gamepad: the gamepad to use for the press
+    :param invert: if True, the control axis is reversed
+    :return: mapping output function suitable to pass to device mapping
+    """
 
     def fun(*args, **kwargs):
         m = args[0]

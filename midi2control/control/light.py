@@ -1,6 +1,12 @@
 import logging
 from leglight import LegLight, discover
 
+"""
+Lighting control outputs which can be added as output to a device mapping.
+
+Uses the leglight library for Elgato lights. Other manufacturers could be similarly implemented
+"""
+
 
 def get_elgato_display(display_name):
     for l in discover(2):

@@ -1,7 +1,6 @@
 import logging
-import mido
 import time
-
+import mido
 
 from midi2control import notify_user
 from midi2control.midi.mapping import MidiMap
@@ -84,19 +83,22 @@ class Device:
                 if m != mapping and m.radio == mapping.radio:
                     m.off(mapping, self)
 
+    def check_inputs(self):
+        if self.device_name not in read_midi_devices()[0]:
+            self.connect()
+
+        for msg in self.inport.iter_pending():
+            logging.debug(msg)
+            for map_name, m in self.midi_maps.get(self.mode).items():
+                if m.type is None or m.type == msg.type:
+                    if m.channel is None or msg.channel in flatten(m.channel):
+                        if ((msg.type == 'control_change' and (m.control is None or msg.control in flatten(m.control)))
+                                or (msg.type == 'note_on' and (m.note is None or msg.note in flatten(m.note)))):
+                            m.message(self, msg)
+
     def monitor_inputs(self):
         while True:
-            if self.device_name not in read_midi_devices()[0]:
-                self.connect()
-
-            for msg in self.inport.iter_pending():
-                logging.debug(msg)
-                for map_name, m in self.midi_maps.get(self.mode).items():
-                    if m.type is None or m.type == msg.type:
-                        if m.channel is None or msg.channel in flatten(m.channel):
-                            if ((msg.type == 'control_change' and (m.control is None or msg.control in flatten(m.control)))
-                                    or (msg.type == 'note_on' and (m.note is None or msg.note in flatten(m.note)))):
-                                m.message(self, msg)
+            self.check_inputs()
 
     def add_maps(self, midi_maps):
         for mode, maps in midi_maps.items():
