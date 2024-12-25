@@ -10,6 +10,6 @@ ddj = DDJ_SB()
 # Monitor inputs (nb: This will not do anything apart from logging the input)
 ddj.monitor_inputs()
 
-# the monitor_inputs method above is blocking
+# the monitor_inputs method above is blocking. For non-blocking use check_inputs() in a loop
 
 

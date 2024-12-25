@@ -1,8 +1,14 @@
 import subprocess
 import os
+
 if os.name == 'nt':
     from win10toast import ToastNotifier
 
+
+"""
+System notifications
+
+"""
 
 def notify_user(subject, message):
     print(subject, message)

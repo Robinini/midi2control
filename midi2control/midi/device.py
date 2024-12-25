@@ -6,7 +6,18 @@ from midi2control import notify_user
 from midi2control.midi.mapping import MidiMap
 
 
+"""
+Base MIDI device.
+
+"""
+
 def flatten(something):
+    """
+    Flatten a multilevel list or item
+
+    :param something: Iterable of any object
+    :return: Flattened list
+    """
     if isinstance(something, (list, tuple, set, range)):
         for sub in something:
             yield from flatten(sub)
@@ -14,6 +25,11 @@ def flatten(something):
         yield something
 
 def read_midi_devices():
+    """
+    Obtain all connected MIDI devices
+
+    :return: list of input devices, list of output devices
+    """
     try:
         inputs = mido.get_input_names()
         outputs = mido.get_output_names()
@@ -24,17 +40,35 @@ def read_midi_devices():
 
 
 def open_input(device_name):
+    """
+    Open a MIDI device as an input
+
+    :param device_name: (str) expected device name eg: 'PIONEER DDJ-SB:PIONEER'
+    :return: Mido input device connection
+    """
     return mido.open_input(device_name)
 
 def open_output(device_name):
+    """
+    Open a MIDI device as an output
+
+    :param device_name: (str) expected device name eg: 'PIONEER DDJ-SB:PIONEER'
+    :return: Mido output device connection
+    """
     return mido.open_output(device_name)
 
 
 class Device:
     def __init__(self, name, device_name=None, midi_maps=None, timeout=None, wait=5):
         """
-        :param name: Name used as midi device name to connect
-        :param midi_maps: List of mappings in dictionary keyed by mode name
+        MIDI device basic class. Can be extended for specific manufacturers or products
+
+        :param name: (str) Name of device
+        :param device_name: (str) Name of device according to mido device connection (defaults to name)
+        :param midi_maps: Dict of Lists of midi.mapping MidiMap instances (keyed by mode name)
+        to use with this device (can be added later wth the methods add_maps or add_map)
+        :param timeout: (int) Seconds to wait for device connection or None if it should wait indefinitely
+        :param wait: Seconds to wait before reattempting (re)connection
         """
 
         self.name = name
@@ -47,15 +81,26 @@ class Device:
         self.connect()
 
         self.midi_maps = dict()  # Accessible using keys
-        self.mode = None
+        self.mode = None  # ToDo: What if the user has just named modes?
 
         if midi_maps:
             self.add_maps(midi_maps)
 
     def __str__(self):
+        """
+        String representation magic method
+        :return: String
+        """
         return f'{self.name} [{self.device_name}]'
 
     def connect(self):
+        """
+        Connect to physical MIDI device. If the explicit device_name is not found, will connect to the first device
+        starting with the device_name. This can be useful if the device name is based on the model
+        but is also appended with usb connection details
+
+        :return: None
+        """
         start_time = time.time()
         while not self.timeout or time.time() - start_time <= self.timeout:
             if self.device_name in read_midi_devices()[0]:
@@ -78,12 +123,26 @@ class Device:
         raise TimeoutError(f'Device {self} not found')
 
     def radio(self, mapping):
+        """
+        Change states of all mappings in a group. None initiating mappings will be set to the opposite
+
+        #ToDO: What if initiating mapping is set to False - do others all get set to True?
+
+        :param mapping: Initiating midi.mapping MidiMap instance
+        :return: None
+        """
         if mapping.radio is not None:
             for m in self.midi_maps.get(self.mode).values():
                 if m != mapping and m.radio == mapping.radio:
                     m.off(mapping, self)
 
     def check_inputs(self):
+        """
+        Read incoming MIDI messages - reconnecting if required
+
+        :return: None
+        """
+
         if self.device_name not in read_midi_devices()[0]:
             self.connect()
 
@@ -97,33 +156,73 @@ class Device:
                             m.message(self, msg)
 
     def monitor_inputs(self):
+        """
+        Blocking method to continually check for MIDI messages from device
+
+        :return: None
+        """
         while True:
             self.check_inputs()
 
     def add_maps(self, midi_maps):
+        """
+        Add midi.mapping MidiMap instances
+
+        :param midi_maps: dict of lists of midi.mapping MidiMap instances (keyed by mode name)
+        :return: None
+        """
         for mode, maps in midi_maps.items():
             for mapping in maps:
                 self.add_map(mapping, mode)
     
     def add_map(self, mapping, mode=None):
+        """
+        Add midi.mapping MidiMap instance to a mode.
+
+        :param mapping: midi.mapping MidiMap instance
+        :param mode: Mode name or None for default mode
+        :return: None
+        """
         if mode not in self.midi_maps:
             self.midi_maps[mode] = dict()
         self.midi_maps[mode][mapping.name] = mapping
 
     def get_map(self, map_name, mode=None):
+        """
+        Access a midi.mapping MidiMap instance within a mode using the mode name and mapping name
+
+        :param map_name: (str) midi.mapping MidiMap instance name
+        :param mode: Mode name or None for default mode
+        :return: midi.mapping MidiMap instance
+        """
         return self.midi_maps[mode][map_name]
 
     def get_mode_key(self, integer):
-        """Calculates suitable rolling index from mode names,
-        taking into account -ve numbers and indexes larger than the list"""
+        """
+        Calculates suitable rolling index from mode names,
+        taking into account -ve numbers and indexes larger than the list
+
+        :param integer: (int)
+        :return: Mode name
+        """
 
         modes = list(self.midi_maps.keys())
         mode_name = modes[integer % len(modes)]
 
         return mode_name
 
+# ToDO: Comments from here. Then Pioneer folder. Then examples. Ten filmli. Then package
+
     def browse_mode(self, mapping, device=None, msg=None):
-        """"""
+        """
+        Method which can be used as a mapping output function to cue a new mode which can be selected
+        with the method change_mode
+
+        :param mapping:
+        :param device:
+        :param msg:
+        :return:
+        """
         mode_key = self.get_mode_key(mapping.current_state)
 
         if mode_key != self.mode:
