@@ -8,16 +8,26 @@ class JogDial(MidiMap):
 
     typ = 'control_change'
 
-    def __init__(self, name, channel, control, description=None, invert=False, max_state=None, min_state=None):
+    def __init__(self, name, channel, control, description=None, outputs=None, invert=False, max_state=None,
+                 min_state=None, initial_state=0):
         """
 
-        :param max: Maximum output limit
-        :param min: Minimum output limit
+        DK-Deck Jog-dial control input.
+        N.b: Sides and top of deck may be differnt cahnnels.
+
+        :param name: (str) Name used to refer or access the mapping
+        :param channel: (int) MIDI channel, iterable of channels or None for all channels
+        :param control: Tuple pair of course and fine controls, or list of control pair tuples
+        :param outputs: List of mapping output functions which should be executed on mapping input
+        :param description: (str) Detailed description of the mapping
+        :param invert: (bool) if False, clockwise increases the state, if True, clockwise will reduce the state value
+        :param max_state: Limit current_state to this maximum value
+        :param min_state: Limit current_state to this minimum value
         :param initial_state: 0 is center 1.0 is full revolution (+ is clockwise)
         """
 
-        MidiMap.__init__(self, name=name, typ=self.typ, channel=channel, control=control,
-                         description=description, initial_state=0)
+        super().__init__(name=name, typ=self.typ, channel=channel, control=control, outputs=outputs,
+                         description=description, initial_state=initial_state)
 
         self.invert = invert
         self.max_state = max_state
@@ -27,9 +37,19 @@ class JogDial(MidiMap):
         self.output()
 
     def reset(self):
-        MidiMap.reset(self)
+        """
+        Reset the current_state to the initial_state
+        :return: None
+        """
+        super().reset()
 
     def message(self, device, msg):
+        """
+        handle a matching MIDI message
+
+        :param device: midi.device Device associated with this mapping
+        :param msg: mido message received from the device
+        """
         scaled_value = (msg.value - 64) / 720
         if self.invert:
             scaled_value = -1 *  scaled_value
@@ -46,13 +66,23 @@ class Browser(MidiMap):
 
     typ = 'control_change'
 
-    def __init__(self, name, channel, control, description=None, invert=False):
-        """
-        Current position as integer + / - from 0 depending on clock-/anticlockwise
+    def __init__(self, name, channel, control, description=None, outputs=None, invert=False):
         """
 
-        MidiMap.__init__(self, name=name, typ=self.typ, channel=channel, control=control,
-                         description=description, initial_state=0)
+        Manages current position as integer + / - from 0 depending on clock-/anticlockwise
+
+        :param name: (str) Name used to refer or access the mapping
+        :param channel: (int) MIDI channel, iterable of channels or None for all channels
+        :param control: (int) MIDI control, iterable of controls or None for all controls
+        :param description: (str) Detailed description of the mapping
+        :param outputs: List of mapping output functions which should be executed on mapping input
+        :param invert: (bool) if False, clockwise increases the state, if True, clockwise will reduce the state value
+        :param outputs: List of mapping output functions which should be executed on mapping input
+
+        """
+
+        super().__init__(name=name, typ=self.typ, channel=channel, control=control, description=description,
+                         outputs=outputs, initial_state=0)
 
         self.invert = invert
 
@@ -60,9 +90,19 @@ class Browser(MidiMap):
         self.output()
 
     def reset(self):
-        MidiMap.reset(self)
+        """
+        Reset the current_state to the initial_state
+        :return: None
+        """
+        super().reset()
 
     def message(self, device, msg):
+        """
+        handle a matching MIDI message
+
+        :param device: midi.device Device associated with this mapping
+        :param msg: mido message received from the device
+        """
         if msg.value < 98:  # Clockwise
             self.set(self.current_state + (-msg.value if self.invert else msg.value))
         else:
@@ -74,16 +114,21 @@ class Slide(MidiMap):
 
     typ = 'control_change'
 
-    def __init__(self, name, channel, control, description=None, invert=False, center=False, step=None):
+    def __init__(self, name, channel, control, description=None, outputs=None, invert=False, center=False, step=None):
         """
-        :param min: What the minimum value should map to
-        :param max: What the minimum value should map to
-        :param step: Output step change, below which, no output activated
-        :param control: Tuple pair of course and fine controls, or list of control pair tuples. Cannot be None
+
+        :param name: (str) Name used to refer or access the mapping
+        :param channel: (int) MIDI channel, iterable of channels or None for all channels
+        :param control: Tuple pair of course and fine controls, or list of control pair tuples
+        :param description: (str) Detailed description of the mapping
+        :param outputs: List of mapping output functions which should be executed on mapping input
+        :param invert: (bool) if False, clockwise increases the state, if True, clockwise will reduce the state value
+        :param center: If True, center position of slider is set to 0 (with +1 and -1 at extents).
+        :param step: Difference between self.previous_state and self.current_state, above which outputs will be triggered
         """
 
         MidiMap.__init__(self, name=name, typ=self.typ, channel=channel, control=control,
-                         description=description, initial_state=1 if invert else 0)
+                         description=description, outputs=outputs, initial_state=1 if invert else 0)
 
         self.invert = invert
         self.center = center
@@ -100,11 +145,21 @@ class Slide(MidiMap):
         self.output()
 
     def reset(self):
-        MidiMap.reset(self)
+        """
+        Reset the current_state to the initial_state
+        :return: None
+        """
+        super().reset()
         self.coarse_value = None
         self.fine_value = None
 
     def message(self, device, msg):
+        """
+        handle a matching MIDI message
+
+        :param device: midi.device Device associated with this mapping
+        :param msg: mido message received from the device
+        """
         if msg.control in self.coarse_control:
             self.coarse_value = msg.value
         elif msg.control in self.fine_control:
@@ -130,31 +185,55 @@ class Slide(MidiMap):
 
 
 class Rotate(Slide):
-    def __init__(self, name, channel, control, description=None, invert=False, center=False):
-        """ Clone of slide. Functionally the same, but named to match Pioneer terminology"""
-        Slide.__init__(self, name=name, channel=channel, control=control, description=description, invert=invert, center=center)
+    """
+    Clone of Slide. Functionally the same, but named to match Pioneer terminology
+    """
+    def __init__(self, name, channel, control, description=None, outputs=None, invert=False, center=False, step=None):
+        Slide.__init__(self, name=name, channel=channel, control=control, description=description, outputs=outputs,
+                       invert=invert, center=center, step=step)
 
 
 class Press(MidiMap):
 
     typ = 'note_on'
 
-    def __init__(self, name, channel, note, feedback=None, toggle=False, description=None,
-                 radio=None, initial_state=False):
+    def __init__(self, name, channel, note, toggle=False, description=None, outputs=None, radio=None, initial_state=False):
+        """
+        PAD button. Can also have built-in LED to provide user feedback.
 
-        MidiMap.__init__(self, name=name, typ=self.typ, channel=channel, note=note,
-                         description=description, radio=radio, initial_state=initial_state)
+        :param name: (str) Name used to refer or access the mapping
+        :param channel: (int) MIDI channel, iterable of channels or None for all channels
+        :param note: (int) MIDI note, iterable of note or None for all note
+        :param toggle: (bool) IF True, button will remain on till next pressed (or radio group deselected)
+        :param description: (str) Detailed description of the mapping
+        :param outputs: List of mapping output functions which should be executed on mapping input
+        :param initial_state: Initial value of the control (True/False/float)
+        :param radio: (str) Name of group if considered a radio button (activation of member resets other members)
 
-        self.feedback = feedback
+        """
+
+        super().__init__(name=name, typ=self.typ, channel=channel, note=note,
+                         description=description, outputs=outputs, radio=radio, initial_state=initial_state)
+
         self.toggle = toggle
 
         self.reset()
         self.output()
 
     def reset(self):
-        MidiMap.reset(self)
+        """
+        Reset the current_state to the initial_state
+        :return: None
+        """
+        super().reset()
 
     def message(self, device, msg):
+        """
+        handle a matching MIDI message
+
+        :param device: midi.device Device associated with this mapping
+        :param msg: mido message received from the device
+        """
         if msg.velocity == 127:
             if self.radio is not None:
                 if self.current_state is not True:
@@ -171,6 +250,16 @@ class Press(MidiMap):
 
 
     def on(self, mapping, device=None, msg=None):
+        """
+        Turn button on - providing LED feedback.
+
+        This accepts parameters consistent with output mappings to allow this method to be the output of another method
+
+        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param device: midi.device Device associated with this mapping (unused)
+        :param msg: mido message received from the device (unused)
+        :return: None
+        """
         """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
         if self.current_state is not True:
             self.set(True)
@@ -180,7 +269,17 @@ class Press(MidiMap):
             self.output(device, msg)
 
     def off(self, mapping, device=None, msg=None):
-        """ nb: Can be called by other maps, eg: Group radio button or multiselect"""
+        """
+        Turn button off - providing LED feedback.
+
+        This accepts parameters consistent with output mappings to allow this method to be the output of another method
+
+        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param device: midi.device Device associated with this mapping (unused)
+        :param msg: mido message received from the device (unused)
+        :return: None
+        """
+
         if self.current_state is not False:
             self.set(False)
             if mapping != self:
@@ -189,11 +288,23 @@ class Press(MidiMap):
             self.output(device, msg)
 
     def led_on(self, device):
+        """
+        Turn the button LED o using the outgoing MIDI channel to the device
+
+        :param device: midi.device Device to send to
+        :return: None
+        """
         for channel in flatten(self.channel):
             for note in flatten(self.note):
                 device.outport.send(mido.Message('note_on', channel=channel, note=note, velocity=127))
 
     def led_off(self, device):
+        """
+        Turn the button LED o using the outgoing MIDI channel to the device
+
+        :param device: midi.device Device to send to
+        :return: None
+        """
         for channel in flatten( self.channel):
             for note in flatten(self.note):
                 device.outport.send(mido.Message('note_on', channel=channel, note=note, velocity=0))

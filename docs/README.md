@@ -8,17 +8,17 @@ or be used as a mouse or virtual gamepad.
 ## Overview
 
 Buttons, keys and sliders of a MIDI device can be configured with mappings. These mappings monitor the current state of the 
-input (eg: on/off) and trigger functions which may use the current state of the device control.
+input (eg: on/off or position) and trigger functions which may use the current state of the device control.
 
 A number of possible control outputs for the mouse, keyboard and other devices are provided.
 
 ## Features
 - Support for any MIDI device
-  - the library uses [Mido](https://mido.readthedocs.io/) to connect to MIDI devices and send/receive MIDI messages)
-  - Controllers for Pioneer controllers are currently configured
+  - uses [Mido](https://mido.readthedocs.io/) to connect to MIDI devices and send/receive MIDI messages
+  - Controllers for Pioneer devices are currently configured
     - Buttons, rotating dials, sliders, jog-wheels and file browser supported
-    - The complete layout of the Pioneer Serato DDJ-SB is configured
-- Multiple triggers can be added to each device control
+    - The complete layout of the Pioneer Serato DDJ-SB device is configured
+- Multiple triggered outputs can be added to each device control
 - Buttons can be set as a toggled or normal with LED Lights providing feedback
 - Buttons can be grouped, similar to HTML radio inputs
 - Stable disconnect and reconnection of devices

@@ -211,18 +211,24 @@ class Device:
 
         return mode_name
 
-# ToDO: Comments from here. Then Pioneer folder. Then examples. Ten filmli. Then package
-
     def browse_mode(self, mapping, device=None, msg=None):
         """
-        Method which can be used as a mapping output function to cue a new mode which can be selected
-        with the method change_mode
+        Device method which can be passed as an output mapping function to a file selector knob.
 
-        :param mapping:
-        :param device:
-        :param msg:
-        :return:
+        This allows the control to preselect ('cue' up) the next mode. The next mode can then be selected
+        by with the device method change_mode() which can be attached to an output button.
+
+        Example use:
+        browser = ddj.get_map('BROWSE:ROTATE')
+        browser.add_output(ddj.browse_mode)
+        ddj.get_map('BROWSE:PRESS').add_output(output(ddj.change_mode, mode_index=browser))
+
+        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param device: midi.device Device associated with this mapping (unused)
+        :param msg: mido message received from the device (unused)
+        :return: None
         """
+
         mode_key = self.get_mode_key(mapping.current_state)
 
         if mode_key != self.mode:
@@ -235,10 +241,17 @@ class Device:
 
     def change_mode(self, mode_key=None, mode_index=None):
         """
+        Changes the current configuration mode to the next selected (or cue'd up) mode
+        from the device method.browse_mode()
+
+        Example use:
+        browser = ddj.get_map('BROWSE:ROTATE')
+        browser.add_output(ddj.browse_mode)
+        ddj.get_map('BROWSE:PRESS').add_output(output(ddj.change_mode, mode_index=browser))
 
         :param mode_key: Mode (dict key) to change to
         :param mode_index: Mode as index integer when mode keys are listed
-        :return:
+        :return: None
         """
 
         # Obtain current_state if the index source is a Map based object
@@ -265,5 +278,9 @@ class Device:
         notify_user(subject, message)
 
     def animate(self):
+        """
+        Abstract method to allow subclass devices to provide some sort of animation using the LED lights for example.
+        :return:
+        """
         pass
 
