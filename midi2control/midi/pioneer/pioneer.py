@@ -255,7 +255,7 @@ class Press(MidiMap):
 
         This accepts parameters consistent with output mappings to allow this method to be the output of another method
 
-        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param mapping: midi.mapping MidiMap based object triggering this method
         :param device: midi.device Device associated with this mapping (unused)
         :param msg: mido message received from the device (unused)
         :return: None
@@ -274,7 +274,7 @@ class Press(MidiMap):
 
         This accepts parameters consistent with output mappings to allow this method to be the output of another method
 
-        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param mapping: midi.mapping MidiMap based object triggering this method
         :param device: midi.device Device associated with this mapping (unused)
         :param msg: mido message received from the device (unused)
         :return: None

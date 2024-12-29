@@ -87,7 +87,7 @@ class MidiMap:
         """
         Abstract method to turn the mapping 'on'
 
-        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param mapping: midi.mapping MidiMap based object triggering this method
         :param device: midi.device Device associated with this mapping
         :param msg: mido message received from the device
         """
@@ -97,7 +97,7 @@ class MidiMap:
         """
         Abstract method to turn the mapping 'off'
 
-        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param mapping: midi.mapping MidiMap based object triggering this method
         :param device: midi.device Device associated with this mapping
         :param msg: mido message received from the device
         """
@@ -110,6 +110,11 @@ class MidiMap:
         :param device: midi.device Device associated with this mapping
         :param msg: mido message received from the device
         """
+        if msg.type == 'note_on':
+            self.set(True)
+        elif msg.type == 'note_off':
+            self.set(False)
+
         self.output(device, msg)
 
     def add_output(self, func, initialise=True):

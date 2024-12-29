@@ -1,3 +1,8 @@
+"""
+Minimum example using predefined mappings of Pioneer DJ-Decks
+
+"""
+
 import logging
 logger = logging.getLogger()
 logger.setLevel('INFO')

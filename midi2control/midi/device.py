@@ -81,7 +81,7 @@ class Device:
         self.connect()
 
         self.midi_maps = dict()  # Accessible using keys
-        self.mode = None  # ToDo: What if the user has just named modes?
+        self.mode = None
 
         if midi_maps:
             self.add_maps(midi_maps)
@@ -126,8 +126,6 @@ class Device:
         """
         Change states of all mappings in a group. None initiating mappings will be set to the opposite
 
-        #ToDO: What if initiating mapping is set to False - do others all get set to True?
-
         :param mapping: Initiating midi.mapping MidiMap instance
         :return: None
         """
@@ -148,7 +146,7 @@ class Device:
 
         for msg in self.inport.iter_pending():
             logging.debug(msg)
-            for map_name, m in self.midi_maps.get(self.mode).items():
+            for map_name, m in self.midi_maps.get(self.mode, dict()).items():
                 if m.type is None or m.type == msg.type:
                     if m.channel is None or msg.channel in flatten(m.channel):
                         if ((msg.type == 'control_change' and (m.control is None or msg.control in flatten(m.control)))
@@ -203,13 +201,15 @@ class Device:
         taking into account -ve numbers and indexes larger than the list
 
         :param integer: (int)
-        :return: Mode name
+        :return: Mode name or None if no mode set
         """
 
-        modes = list(self.midi_maps.keys())
-        mode_name = modes[integer % len(modes)]
+        if self.midi_maps:
 
-        return mode_name
+            modes = list(self.midi_maps.keys())
+            mode_name = modes[integer % len(modes)]
+
+            return mode_name
 
     def browse_mode(self, mapping, device=None, msg=None):
         """
@@ -223,7 +223,7 @@ class Device:
         browser.add_output(ddj.browse_mode)
         ddj.get_map('BROWSE:PRESS').add_output(output(ddj.change_mode, mode_index=browser))
 
-        :param mapping: midi.mapping MidiMap based object triggering ths method
+        :param mapping: midi.mapping MidiMap based object triggering this method
         :param device: midi.device Device associated with this mapping (unused)
         :param msg: mido message received from the device (unused)
         :return: None

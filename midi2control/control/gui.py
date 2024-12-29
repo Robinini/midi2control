@@ -288,3 +288,19 @@ def paste():
     :return: mapping output function suitable to pass to device mapping
     """
     return hotkey('ctrl', 'v')
+
+
+def ctrl_tab():
+    """
+    Creates callable function to execute a hotkey combination for a paste operation
+    :return: mapping output function suitable to pass to device mapping
+    """
+    return hotkey('ctrl', 'tab')
+
+
+def shift_ctrl_tab():
+    """
+    Creates callable function to execute a hotkey combination for a paste operation
+    :return: mapping output function suitable to pass to device mapping
+    """
+    return hotkey('shift', 'ctrl', 'tab')
