@@ -5,6 +5,8 @@ Use the input of any MIDI device to trigger actions.
 For example - a DJ deck can be used to control scrubbing in a video editor, turn lights on 
 or be used as a mouse or virtual gamepad.
 
+![midi2control](midi2control.gif)
+
 ## Overview
 
 Buttons, keys and sliders of a MIDI device can be configured with mappings. These mappings monitor the current state of the 
